@@ -1,0 +1,343 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+import os
+import sys
+
+from pylab import *
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+#tanb=np.loadtxt("./data.txt")
+
+
+
+ii=1500#455#mphi
+jj=334#tanb
+
+#tanb = np.zeros((m,n),dtype=np.int)
+tanbx = [[0 for i in range(0,ii*jj)] for j in range(0,2)]
+#print len(tanb[:])
+#print tanb[:][0]
+
+
+for i in range(0,ii):
+    for j in range(0,jj):
+
+         tanbx[0][i*jj+j]=i*2#10**(i*0.003+log10(130))
+         tanbx[1][i*jj+j]=10**(j*0.0081-1)
+
+mphi0 = tanbx[:][0]
+tanb0 = tanbx[:][1]
+
+mphi0= np.asarray(mphi0)
+tanb0= np.asarray(tanb0)
+
+print len(mphi0),max(mphi0),min(tanb0)
+
+print mphi0[1],"\n\n",tanb0[0]
+##################################################
+
+vev = 246
+mh=125
+signsinba=1
+
+lambv0=0
+
+cosba0=0.005
+
+def l1v2(tanb,cosba,mh2,ma,mc,lambv2):
+    l1v2num = (mh2**2*tanb**2+mh**2)*(1-cosba**2)   \
+    +(mh2**2+mh**2*tanb**2)*cosba**2                 \
+    + 2*(mh2**2-mh**2)*signsinba*(1-cosba**2)**0.5*cosba*tanb   \
+    - (mh2**2 - lambv2*vev**2)*tanb**2
+    return l1v2num
+
+def l2v2(tanb,cosba,mh2,ma,mc,lambv2):
+    l2v2num = (mh2**2/tanb**2+mh**2)*(1-cosba**2)   \
+    +(mh2**2+mh**2/tanb**2)*cosba**2                 \
+    - 2*(mh2**2-mh**2)*signsinba*(1-cosba**2)**0.5*cosba/tanb   \
+    - (mh2**2 - lambv2*vev**2)/tanb**2
+    return l2v2num
+
+def l3v2(tanb,cosba,mh2,ma,mc,lambv2):
+    l3v2num = (mh2**2-mh**2)*                                      \
+    (2*cosba**2-1+(tanb-1/tanb)*signsinba*(1-cosba**2)**0.5*cosba ) \
+    + 2*mc**2-(mh2**2-lambv2**2)                                    
+    return l3v2num
+
+def l4v2(tanb,cosba,mh2,ma,mc,lambv2):
+    l4v2num =   mh2**2-lambv2*vev**2 + ma**2-2*mc**2       
+    return l4v2num
+
+def l5v2(tanb,cosba,mh2,ma,mc,lambv2):
+    l5v2num =   mh2**2-lambv2*vev**2 -ma**2       
+    return l5v2num
+
+#########################
+
+fv1 = l1v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0)>0
+fv2 = l2v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0)>0
+fv3 = l3v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0)+ \
+      (abs(l1v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0) * \
+       l2v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0)))**0.5 > 0
+
+fv4 = l3v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0) + \
+      l4v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0) - \
+      abs(l5v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0)) + \
+      (abs(l1v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0) * \
+       l2v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0)))**0.5 > 0
+
+fp1 = 4*3.141592653589793*vev**2 - \
+      abs(l1v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0)) >0
+
+fp2 = 4*3.141592653589793*vev**2 - \
+      abs(l2v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0)) >0
+
+fp3 = 4*3.141592653589793*vev**2 - \
+      abs(l3v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0)) >0
+
+fp4 = 4*3.141592653589793*vev**2 - \
+      abs(l4v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0)) >0
+
+fp5 = 4*3.141592653589793*vev**2 - \
+      abs(l5v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0)) >0
+
+fu1 = 8*3.141592653589793*vev**2 - \
+      abs(l3v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0) + \
+       l4v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0)) > 0
+
+fu2 = 8*3.141592653589793*vev**2 - \
+      abs(l3v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0) - \
+       l4v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0)) > 0
+
+fu3 = 8*3.141592653589793*vev**2 - \
+      abs(l3v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0) + \
+       l5v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0)) > 0
+
+fu4 = 8*3.141592653589793*vev**2 - \
+      abs(l3v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0) - \
+       l5v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0)) > 0
+
+fu5 = 8*3.141592653589793*vev**2 - \
+      abs(l3v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0) + \
+       2*l4v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0)  + \
+       3*l5v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0)  ) > 0
+
+fu6 = 8*3.141592653589793*vev**2 - \
+      abs(l3v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0) + \
+       2*l4v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0)  - \
+       3*l5v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0)  ) > 0
+
+fu7 = 8*3.141592653589793*vev**2 - 0.5* \
+      abs(l1v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0) + \
+       l2v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0)  + \
+       ((l1v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0)- \
+        l2v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0))**2 + \
+        4*l4v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0)**2)**0.5 ) > 0
+
+fu8 = 8*3.141592653589793*vev**2 - 0.5* \
+      abs(l1v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0) + \
+       l2v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0)  - \
+       ((l1v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0)- \
+        l2v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0))**2 + \
+        4*l4v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0)**2)**0.5 ) > 0
+
+fu9 = 8*3.141592653589793*vev**2 - 0.5* \
+      abs(l1v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0) + \
+       l2v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0)  + \
+       ((l1v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0)- \
+      l2v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0))**2 + \
+      4*abs(l5v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0))**2)**0.5 ) > 0
+
+fu10 = 8*3.141592653589793*vev**2 - 0.5* \
+      abs(l1v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0) + \
+       l2v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0)  - \
+       ((l1v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0)- \
+      l2v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0))**2 + \
+      4*abs(l5v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0))**2)**0.5 ) > 0
+
+fu11 = 8*3.141592653589793*vev**2 - 0.5* \
+      abs(3*l1v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0) + \
+       3*l2v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0)  + \
+       (9*(l1v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0)- \
+      l2v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0))**2 + \
+      4*(2*l3v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0) + \
+          l4v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0))**2)**0.5 ) > 0
+
+fu12 = 8*3.141592653589793*vev**2 - 0.5* \
+      abs(3*l1v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0) + \
+       3*l2v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0)  + \
+       (9*(l1v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0)- \
+      l2v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0))**2 + \
+      4*(2*l3v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0) + \
+          l4v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0))**2)**0.5 ) > 0
+
+
+
+slecv=fv1 & fv2 & fv3 & fv4
+slecp=fp1 & fp2 & fp3 & fp4 & fp5
+slecu=fu1 & fu2 & fu3 & fu4 & fu5 & fu6 & fu7 & fu8 & fu9 \
+       & fu10 & fu11 & fu12  
+
+slec1 = slecv & slecp & slecu
+
+plt.scatter(mphi0[slec1], tanb0[slec1], alpha=0.01,c='green')
+
+##################################################
+
+vev = 246
+mh=125
+signsinba=1
+
+lambv0=0
+
+cosba0=-0.005
+
+def l1v2(tanb,cosba,mh2,ma,mc,lambv2):
+    l1v2num = (mh2**2*tanb**2+mh**2)*(1-cosba**2)   \
+    +(mh2**2+mh**2*tanb**2)*cosba**2                 \
+    + 2*(mh2**2-mh**2)*signsinba*(1-cosba**2)**0.5*cosba*tanb   \
+    - (mh2**2 - lambv2*vev**2)*tanb**2
+    return l1v2num
+
+def l2v2(tanb,cosba,mh2,ma,mc,lambv2):
+    l2v2num = (mh2**2/tanb**2+mh**2)*(1-cosba**2)   \
+    +(mh2**2+mh**2/tanb**2)*cosba**2                 \
+    - 2*(mh2**2-mh**2)*signsinba*(1-cosba**2)**0.5*cosba/tanb   \
+    - (mh2**2 - lambv2*vev**2)/tanb**2
+    return l2v2num
+
+def l3v2(tanb,cosba,mh2,ma,mc,lambv2):
+    l3v2num = (mh2**2-mh**2)*                                      \
+    (2*cosba**2-1+(tanb-1/tanb)*signsinba*(1-cosba**2)**0.5*cosba ) \
+    + 2*mc**2-(mh2**2-lambv2**2)                                    
+    return l3v2num
+
+def l4v2(tanb,cosba,mh2,ma,mc,lambv2):
+    l4v2num =   mh2**2-lambv2*vev**2 + ma**2-2*mc**2       
+    return l4v2num
+
+def l5v2(tanb,cosba,mh2,ma,mc,lambv2):
+    l5v2num =   mh2**2-lambv2*vev**2 -ma**2       
+    return l5v2num
+
+#########################
+
+fv1 = l1v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0)>0
+fv2 = l2v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0)>0
+fv3 = l3v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0)+ \
+      (abs(l1v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0) * \
+       l2v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0)))**0.5 > 0
+
+fv4 = l3v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0) + \
+      l4v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0) - \
+      abs(l5v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0)) + \
+      (abs(l1v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0) * \
+       l2v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0)))**0.5 > 0
+
+fp1 = 4*3.141592653589793*vev**2 - \
+      abs(l1v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0)) >0
+
+fp2 = 4*3.141592653589793*vev**2 - \
+      abs(l2v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0)) >0
+
+fp3 = 4*3.141592653589793*vev**2 - \
+      abs(l3v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0)) >0
+
+fp4 = 4*3.141592653589793*vev**2 - \
+      abs(l4v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0)) >0
+
+fp5 = 4*3.141592653589793*vev**2 - \
+      abs(l5v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0)) >0
+
+fu1 = 8*3.141592653589793*vev**2 - \
+      abs(l3v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0) + \
+       l4v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0)) > 0
+
+fu2 = 8*3.141592653589793*vev**2 - \
+      abs(l3v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0) - \
+       l4v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0)) > 0
+
+fu3 = 8*3.141592653589793*vev**2 - \
+      abs(l3v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0) + \
+       l5v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0)) > 0
+
+fu4 = 8*3.141592653589793*vev**2 - \
+      abs(l3v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0) - \
+       l5v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0)) > 0
+
+fu5 = 8*3.141592653589793*vev**2 - \
+      abs(l3v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0) + \
+       2*l4v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0)  + \
+       3*l5v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0)  ) > 0
+
+fu6 = 8*3.141592653589793*vev**2 - \
+      abs(l3v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0) + \
+       2*l4v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0)  - \
+       3*l5v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0)  ) > 0
+
+fu7 = 8*3.141592653589793*vev**2 - 0.5* \
+      abs(l1v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0) + \
+       l2v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0)  + \
+       ((l1v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0)- \
+        l2v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0))**2 + \
+        4*l4v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0)**2)**0.5 ) > 0
+
+fu8 = 8*3.141592653589793*vev**2 - 0.5* \
+      abs(l1v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0) + \
+       l2v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0)  - \
+       ((l1v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0)- \
+        l2v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0))**2 + \
+        4*l4v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0)**2)**0.5 ) > 0
+
+fu9 = 8*3.141592653589793*vev**2 - 0.5* \
+      abs(l1v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0) + \
+       l2v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0)  + \
+       ((l1v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0)- \
+      l2v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0))**2 + \
+      4*abs(l5v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0))**2)**0.5 ) > 0
+
+fu10 = 8*3.141592653589793*vev**2 - 0.5* \
+      abs(l1v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0) + \
+       l2v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0)  - \
+       ((l1v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0)- \
+      l2v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0))**2 + \
+      4*abs(l5v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0))**2)**0.5 ) > 0
+
+fu11 = 8*3.141592653589793*vev**2 - 0.5* \
+      abs(3*l1v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0) + \
+       3*l2v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0)  + \
+       (9*(l1v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0)- \
+      l2v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0))**2 + \
+      4*(2*l3v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0) + \
+          l4v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0))**2)**0.5 ) > 0
+
+fu12 = 8*3.141592653589793*vev**2 - 0.5* \
+      abs(3*l1v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0) + \
+       3*l2v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0)  + \
+       (9*(l1v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0)- \
+      l2v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0))**2 + \
+      4*(2*l3v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0) + \
+          l4v2(tanb0,cosba0,mphi0,mphi0,mphi0,lambv0))**2)**0.5 ) > 0
+
+
+
+slecv=fv1 & fv2 & fv3 & fv4
+slecp=fp1 & fp2 & fp3 & fp4 & fp5
+slecu=fu1 & fu2 & fu3 & fu4 & fu5 & fu6 & fu7 & fu8 & fu9 \
+       & fu10 & fu11 & fu12  
+
+slec1 = slecv & slecp & slecu
+
+
+plt.scatter(mphi0[slec1], tanb0[slec1], alpha=0.01,c='r')
+
+
+xlim(125, 3000)
+ylim(0.1, 50)
+yscale('log')
+plt.savefig("./mphitanb_th.png",dpi=300)
+
+plt.show()
+
