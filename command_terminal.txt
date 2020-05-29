@@ -1,0 +1,10 @@
+run without termial screen output
+    ./runana_22  >> /dev/null
+
+Count the Number of lines, Words, and, Characters in a Text File from Terminal
+   " wc” basically means “word count”
+   number of lines:  wc -l yourTextFile
+   number of words:   wc -w yourTextFile
+   number of characters:  wc -m yourTextFile
+   match a pattern:     less my_text_file.txt | grep -c "pattern"
+                        grep -c "pattern" my_text_file.txt
